@@ -1,0 +1,50 @@
+{
+	"name": "ausgabe",
+	"version": "0.0.1",
+	"authors": [
+		"Tobias Reich <tobias@electerious.com>"
+	],
+	"description": "Tiny logger with zero defaults",
+	"type": "module",
+	"main": "src/index.js",
+	"keywords": [
+		"log",
+		"logger",
+		"logging",
+		"debug",
+		"debugging",
+		"console"
+	],
+	"license": "MIT",
+	"homepage": "https://github.com/electerious/ausgabe",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/electerious/ausgabe.git"
+	},
+	"files": [
+		"src"
+	],
+	"scripts": {
+		"eslint": "eslint --ignore-path .gitignore '**/*.js'",
+		"prettier": "prettier --ignore-path .gitignore '**/*.{js,json,css,md}'",
+		"test": "npm run lint && npm run prettier -- --check && ava",
+		"test:coverage": "npm run lint && npm run prettier -- --check && c8 --all --include 'src/**/*.js' --reporter=lcov --reporter=text-summary ava",
+		"lint": "npm run eslint",
+		"format": "npm run prettier -- --write"
+	},
+	"devDependencies": {
+		"@electerious/eslint-config": "^3.5.0",
+		"@electerious/prettier-config": "^1.0.0",
+		"ava": "^4.3.3",
+		"c8": "^7.12.0",
+		"eslint-config-prettier": "^8.5.0"
+	},
+	"eslintConfig": {
+		"root": true,
+		"extends": [
+			"@electerious/eslint-config",
+			"prettier"
+		]
+	},
+	"prettier": "@electerious/prettier-config"
+}
