@@ -26,7 +26,7 @@
 	],
 	"scripts": {
 		"eslint": "eslint --ignore-path .gitignore \"**/*.js\"",
-		"prettier": "prettier --end-of-line auto --ignore-path .gitignore \"**/*.{js,json,css,md}\"",
+		"prettier": "prettier --ignore-path .gitignore \"**/*.{js,json,css,md}\"",
 		"test": "npm run lint && npm run prettier -- --check && ava",
 		"test:coverage": "npm run lint && npm run prettier -- --check && c8 --all --include \"src/**/*.js\" --reporter=lcov --reporter=text-summary ava",
 		"lint": "npm run eslint",
