@@ -69,16 +69,6 @@ const instance = createLogger(
 		},
 	},
 	{
-		filter: (typeName) => {
-			switch (process.env.NODE_ENV) {
-				case 'production':
-					// Just log errors
-					return typeName === 'error'
-				default:
-					// Log everything
-					return true
-			}
-		},
 		indention: 7,
 	}
 )
@@ -141,7 +131,6 @@ const instance = createLogger(
 		},
 	},
 	{
-		filter: (typeName) => true,
 		indention: 6,
 	}
 )
@@ -155,7 +144,6 @@ const instance = createLogger(
   - `label` `{?String}` Label to log along with the message. Defaults to `info`.
   - `stack` `{?Boolean}` Determines if the stack of an error should be logged. Defaults to `true`.
 - `types` `{?Object}` Options.
-  - `filter` `{?Function}({String})` Function that filters the types that should be logged. Return `true` to include a type.
   - `indention` `{?Integer}` Aligns log messages with a custom indention.
 
 ### Returns

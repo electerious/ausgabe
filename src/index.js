@@ -1,12 +1,10 @@
 import util from 'node:util'
-import fs from 'node:fs'
 import chalk from 'chalk'
 import figures from 'figures'
 
 const IDENTIFIER = Symbol('IDENTIFIER')
 
 const defaultOptions = {
-	filter: () => true,
 	indention: 0,
 }
 
@@ -15,22 +13,24 @@ const defaultTypeOptions = {
 	badge: figures.info,
 	label: 'info',
 	stack: true,
+	streams: [process.stdout],
 }
 
-const logMessageToConsole = (prefix, message, substitutions) => {
-	console.log(`${prefix}  ${message}`, ...substitutions)
+const parse = (message, ...substitutions) => {
+	if (message instanceof Error) {
+		return [message.message, message.stack.split('\n').slice(1)]
+	}
+
+	return [util.format(message, ...substitutions), []]
 }
 
-const logStackToConsole = (stack) => {
-	const [, ...parsedStack] = stack.split('\n')
-	const printableStack = parsedStack.join('\n')
-
-	console.log(chalk.gray(printableStack))
-}
-
-const logMessageToFile = (file, message, substitutions) => {
-	fs.appendFileSync(file, util.format(message, ...substitutions) + '\n')
-}
+const write =
+	(streams) =>
+	(...messages) => {
+		streams.forEach((stream) => {
+			stream.write(`${messages.join('')} \n`)
+		})
+	}
 
 export const createLogger = (types, options) => {
 	const methods = Object.entries(types).reduce((methods, [typeName, typeOptions]) => {
@@ -42,29 +42,27 @@ export const createLogger = (types, options) => {
 			}
 		}
 
-		const { filter, indention } = {
+		const { indention } = {
 			...defaultOptions,
 			...options,
 		}
 
-		const { color, badge, label, stack, file } = {
+		const { color, badge, label, stack, streams } = {
 			...defaultTypeOptions,
 			...typeOptions,
 		}
 
+		const writer = write(streams)
+
+		const padding = Math.max(0, indention - label.length)
+		const spacing = '  '
+		const prefix = chalk[color](badge + spacing + label.padEnd(padding) + spacing)
+
 		const method = (message, ...substitutions) => {
-			const included = filter(typeName) === true
-			const prefix = chalk[color](badge + '  ' + label + ' '.repeat(Math.max(0, indention - label.length)))
+			const [parsedMessage, parsedStack] = parse(message, ...substitutions)
 
-			// Log message to console
-			if (included === true) logMessageToConsole(prefix, message, substitutions)
-
-			// Check if the message is an error with a stack
-			const hasErrorStack = message instanceof Error && message.stack != null
-			if (hasErrorStack === true && stack === true && included === true) logStackToConsole(message.stack)
-
-			// Log message to file
-			if (file != null) logMessageToFile(file, message, substitutions)
+			writer(prefix, parsedMessage)
+			if (stack === true) parsedStack.forEach((line) => writer(chalk.gray(line)))
 		}
 
 		return {
