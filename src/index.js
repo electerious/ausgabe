@@ -54,9 +54,8 @@ export const createLogger = (types, options) => {
 
 		const writer = write(streams)
 
-		const padding = Math.max(0, indention - label.length)
 		const spacing = '  '
-		const prefix = chalk[color](badge + spacing + label.padEnd(padding) + spacing)
+		const prefix = chalk[color](badge + spacing + label.padEnd(indention) + spacing)
 
 		const method = (message, ...substitutions) => {
 			const [parsedMessage, parsedStack] = parse(message, ...substitutions)
