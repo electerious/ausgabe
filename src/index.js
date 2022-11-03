@@ -18,7 +18,10 @@ const defaultTypeOptions = {
 
 const parse = (message, ...substitutions) => {
 	if (message instanceof Error) {
-		return [message.message, message.stack.split('\n').slice(1)]
+		const parsedMessage = message.message
+		const parsedStack = message.stack ?? ''
+
+		return [parsedMessage, parsedStack.split('\n').slice(1)]
 	}
 
 	return [util.format(message, ...substitutions), []]
