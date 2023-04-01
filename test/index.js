@@ -113,6 +113,31 @@ test.serial('logs error message', (t) => {
 	instance.info(message)
 })
 
+test.serial('logs error stack', (t) => {
+	let count = 0
+
+	const message = new Error(uuid())
+
+	const stream = new Writable({
+		write: (chunk, encoding, callback) => {
+			count += 1
+			callback()
+		},
+	})
+
+	const instance = createLogger({
+		info: {
+			streams: [stream],
+		},
+	})
+
+	instance.info(message)
+
+	// The test only includes one log call which means we can assume that
+	// multiple write stream calls mean that the stack has been logged.
+	t.true(count > 1)
+})
+
 test.serial('returns nested logger', (t) => {
 	const instance = createLogger({
 		instance: createLogger({
