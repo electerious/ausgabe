@@ -33,8 +33,7 @@
 		"format": "npm run prettier -- --write"
 	},
 	"dependencies": {
-		"chalk": "^5.1.2",
-		"figures": "^5.0.0"
+		"chalk": "^5.1.2"
 	},
 	"devDependencies": {
 		"@electerious/eslint-config": "^3.5.0",

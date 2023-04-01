@@ -1,6 +1,5 @@
 import util from 'node:util'
 import chalk from 'chalk'
-import figures from 'figures'
 
 const IDENTIFIER = Symbol('IDENTIFIER')
 
@@ -10,7 +9,7 @@ const defaultOptions = {
 
 const defaultTypeOptions = {
 	color: 'blue',
-	badge: figures.info,
+	badge: 'ℹ',
 	label: 'info',
 	stack: true,
 	streams: [process.stdout],
