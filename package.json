@@ -26,15 +26,16 @@
     "format": "npm run eslint -- --fix && npm run prettier -- --write",
     "lint": "npm run eslint && npm run prettier -- --check",
     "prettier": "prettier --ignore-path .gitignore \"**/*.{js,json,md,yml}\"",
-    "test": "npm run lint && node --test",
-    "test:coverage": "npm run lint && npm run prettier -- --check && c8 --all --include \"src/**/*.js\" --reporter=lcov --reporter=text-summary ava"
+    "test": "npm run lint && node --test"
   },
   "dependencies": {
     "chalk": "^5.1.2"
   },
   "devDependencies": {
     "@electerious/eslint-config": "^5.2.0",
-    "@electerious/prettier-config": "^4.0.0"
+    "@electerious/prettier-config": "^4.0.0",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2"
   },
   "authors": [
     "Tobias Reich <tobias@electerious.com>"
