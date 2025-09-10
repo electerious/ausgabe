@@ -37,6 +37,9 @@
     "eslint": "^9.35.0",
     "prettier": "^3.6.2"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "authors": [
     "Tobias Reich <tobias@electerious.com>"
   ]
