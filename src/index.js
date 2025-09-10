@@ -1,18 +1,18 @@
-import util from 'node:util'
 import chalk from 'chalk'
+import { format } from 'node:util'
 
 const IDENTIFIER = Symbol('IDENTIFIER')
 
 const defaultOptions = {
-	indention: 0,
+  indention: 0,
 }
 
 const defaultTypeOptions = {
-	color: 'blue',
-	badge: 'ℹ',
-	label: 'info',
-	stack: true,
-	streams: [process.stdout],
+  color: 'blue',
+  badge: 'ℹ',
+  label: 'info',
+  stack: true,
+  streams: [process.stdout],
 }
 
 /**
@@ -24,14 +24,14 @@ const defaultTypeOptions = {
  * @returns {[string, string[]]} - Parsed message and stack trace (if applicable).
  */
 const parse = (message, ...substitutions) => {
-	if (message instanceof Error) {
-		const parsedMessage = message.message
-		const parsedStack = message.stack ?? ''
+  if (message instanceof Error) {
+    const parsedMessage = message.message
+    const parsedStack = message.stack ?? ''
 
-		return [parsedMessage, parsedStack.split('\n').slice(1)]
-	}
+    return [parsedMessage, parsedStack.split('\n').slice(1)]
+  }
 
-	return [util.format(message, ...substitutions), []]
+  return [format(message, ...substitutions), []]
 }
 
 /**
@@ -41,63 +41,63 @@ const parse = (message, ...substitutions) => {
  * @returns {function(...string): void} - A function that writes messages to the streams.
  */
 const write =
-	(streams) =>
-	(...messages) => {
-		streams.forEach((stream) => {
-			stream.write(`${messages.join('')} \n`)
-		})
-	}
+  (streams) =>
+  (...messages) => {
+    for (const stream of streams) {
+      stream.write(`${messages.join('')} \n`)
+    }
+  }
 
 /**
  * Creates a logger instance with the specified types and options.
  *
  * @param {object} types - Logger types configuration. Each key is a log type with its options.
- * @param {object} [options] - Global options for the logger.
- * @param {number} [options.indention=0] - Indentation level for log labels.
+ * @param {?object} options - Global options for the logger.
+ * @param {?number} options.indention - Indentation level for log labels.
  * @returns {object} - Logger instance with methods for each log type.
  */
 export const createLogger = (types, options) => {
-	const methods = Object.entries(types).reduce((methods, [typeName, typeOptions]) => {
-		const isNestedInstance = typeOptions[IDENTIFIER] === true
-		if (isNestedInstance === true) {
-			return {
-				...methods,
-				[typeName]: typeOptions,
-			}
-		}
+  const methods = Object.entries(types).reduce((methods, [typeName, typeOptions]) => {
+    const isNestedInstance = typeOptions[IDENTIFIER] === true
+    if (isNestedInstance === true) {
+      return {
+        ...methods,
+        [typeName]: typeOptions,
+      }
+    }
 
-		const { indention } = {
-			...defaultOptions,
-			...options,
-		}
+    const { indention } = {
+      ...defaultOptions,
+      ...options,
+    }
 
-		const { color, badge, label, stack, streams } = {
-			...defaultTypeOptions,
-			...typeOptions,
-		}
+    const { color, badge, label, stack, streams } = {
+      ...defaultTypeOptions,
+      ...typeOptions,
+    }
 
-		const writer = write(streams)
+    const writer = write(streams)
 
-		const spacing = '  '
-		const prefix = chalk[color](badge + spacing + label.padEnd(indention) + spacing)
+    const spacing = '  '
+    const prefix = chalk[color](badge + spacing + label.padEnd(indention) + spacing)
 
-		const method = (message, ...substitutions) => {
-			const [parsedMessage, parsedStack] = parse(message, ...substitutions)
+    const method = (message, ...substitutions) => {
+      const [parsedMessage, parsedStack] = parse(message, ...substitutions)
 
-			writer(prefix, parsedMessage)
-			if (stack === true) parsedStack.forEach((line) => writer(chalk.gray(line)))
-		}
+      writer(prefix, parsedMessage)
+      if (stack === true) for (const line of parsedStack) writer(chalk.gray(line))
+    }
 
-		return {
-			...methods,
-			[typeName]: method,
-		}
-	}, {})
+    return {
+      ...methods,
+      [typeName]: method,
+    }
+  }, {})
 
-	return {
-		// Unique key used to identity logger instances
-		[IDENTIFIER]: true,
-		// Type methods
-		...methods,
-	}
+  return {
+    // Unique key used to identity logger instances
+    [IDENTIFIER]: true,
+    // Type methods
+    ...methods,
+  }
 }
