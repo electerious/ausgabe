@@ -43,11 +43,11 @@ npm install ausgabe
 import { createLogger } from 'ausgabe'
 
 const instance = createLogger({
-	info: {
-		color: 'blue',
-		badge: 'ℹ',
-		label: 'info',
-	},
+  info: {
+    color: 'blue',
+    badge: 'ℹ',
+    label: 'info',
+  },
 })
 
 instance.info('Hello world')
@@ -60,27 +60,27 @@ import figures from 'figures'
 import { createLogger } from 'ausgabe'
 
 const instance = createLogger(
-	{
-		info: {
-			color: 'blue',
-			badge: figures.info,
-			label: 'info',
-		},
-		warn: {
-			color: 'yellow',
-			badge: figures.warning,
-			label: 'warn',
-			stack: false,
-		},
-		error: {
-			color: 'red',
-			badge: figures.cross,
-			label: 'error',
-		},
-	},
-	{
-		indention: 7,
-	}
+  {
+    info: {
+      color: 'blue',
+      badge: figures.info,
+      label: 'info',
+    },
+    warn: {
+      color: 'yellow',
+      badge: figures.warning,
+      label: 'warn',
+      stack: false,
+    },
+    error: {
+      color: 'red',
+      badge: figures.cross,
+      label: 'error',
+    },
+  },
+  {
+    indention: 7,
+  },
 )
 
 instance.info('Hello world')
@@ -97,18 +97,18 @@ instance.error(new Error('Logs error with the stack'))
 import { createLogger } from 'ausgabe'
 
 const instance = createLogger({
-	requests: createLogger({
-		get: {
-			color: 'magenta',
-			badge: '↗',
-			label: 'get',
-		},
-		post: {
-			color: 'magenta',
-			badge: '↗',
-			label: 'post',
-		},
-	}),
+  requests: createLogger({
+    get: {
+      color: 'magenta',
+      badge: '↗',
+      label: 'get',
+    },
+    post: {
+      color: 'magenta',
+      badge: '↗',
+      label: 'post',
+    },
+  }),
 })
 
 instance.requests.get('http://example.com')
@@ -124,19 +124,19 @@ import { Writable } from 'node:stream'
 import { createLogger } from 'ausgabe'
 
 const stream = new Writable({
-	write: (chunk, encoding, callback) => {
-		console.log(chunk.toString())
-		callback()
-	},
+  write: (chunk, encoding, callback) => {
+    console.log(chunk.toString())
+    callback()
+  },
 })
 
 const instance = createLogger({
-	info: {
-		color: 'blue',
-		badge: 'ℹ',
-		label: 'info',
-		streams: [stream],
-	},
+  info: {
+    color: 'blue',
+    badge: 'ℹ',
+    label: 'info',
+    streams: [stream],
+  },
 })
 
 instance.info('Hello world')
@@ -150,11 +150,11 @@ instance.info('Hello world')
 import { createLogger } from 'ausgabe'
 
 const instance = createLogger({
-	info: {
-		color: 'blue',
-		badge: 'ℹ',
-		label: 'info',
-	},
+  info: {
+    color: 'blue',
+    badge: 'ℹ',
+    label: 'info',
+  },
 })
 ```
 
@@ -162,16 +162,16 @@ const instance = createLogger({
 import { createLogger } from 'ausgabe'
 
 const instance = createLogger(
-	{
-		info: {
-			color: 'blue',
-			badge: 'ℹ',
-			label: 'info',
-		},
-	},
-	{
-		indention: 6,
-	}
+  {
+    info: {
+      color: 'blue',
+      badge: 'ℹ',
+      label: 'info',
+    },
+  },
+  {
+    indention: 6,
+  },
 )
 ```
 

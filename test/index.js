@@ -1,149 +1,161 @@
-import util from 'node:util'
-import { Writable } from 'node:stream'
+import assert from 'node:assert/strict'
 import { randomUUID as uuid } from 'node:crypto'
-import test from 'ava'
+import { Writable } from 'node:stream'
+import { test } from 'node:test'
+import { format } from 'node:util'
 
 import { createLogger } from '../src/index.js'
 
-test.serial('logs badge', (t) => {
-	t.plan(1)
+test('logs badge', () => {
+  return new Promise((resolve) => {
+    const badge = uuid()
 
-	const badge = uuid()
+    const stream = new Writable({
+      write: (chunk, encoding, callback) => {
+        assert.ok(chunk.toString().includes(badge))
+        callback()
+        resolve()
+      },
+    })
 
-	const stream = new Writable({
-		write: (chunk, encoding, callback) => {
-			t.true(chunk.toString().includes(badge))
-			callback()
-		},
-	})
+    const instance = createLogger({
+      info: {
+        badge,
+        streams: [stream],
+      },
+    })
 
-	const instance = createLogger({
-		info: {
-			badge: badge,
-			streams: [stream],
-		},
-	})
-
-	instance.info()
+    instance.info()
+  })
 })
 
-test.serial('logs label', (t) => {
-	t.plan(1)
+test('logs label', () => {
+  return new Promise((resolve) => {
+    const label = uuid()
 
-	const label = uuid()
+    const stream = new Writable({
+      write: (chunk, encoding, callback) => {
+        assert.ok(chunk.toString().includes(label))
+        callback()
+        resolve()
+      },
+    })
 
-	const stream = new Writable({
-		write: (chunk, encoding, callback) => {
-			t.true(chunk.toString().includes(label))
-			callback()
-		},
-	})
+    const instance = createLogger({
+      info: {
+        label,
+        streams: [stream],
+      },
+    })
 
-	const instance = createLogger({
-		info: {
-			label: label,
-			streams: [stream],
-		},
-	})
-
-	instance.info()
+    instance.info()
+  })
 })
 
-test.serial('logs string message', (t) => {
-	t.plan(1)
+test('logs string message', () => {
+  return new Promise((resolve) => {
+    const message = uuid()
 
-	const message = uuid()
+    const stream = new Writable({
+      write: (chunk, encoding, callback) => {
+        assert.ok(chunk.toString().includes(message))
+        callback()
+        resolve()
+      },
+    })
 
-	const stream = new Writable({
-		write: (chunk, encoding, callback) => {
-			t.true(chunk.toString().includes(message))
-			callback()
-		},
-	})
+    const instance = createLogger({
+      info: {
+        streams: [stream],
+      },
+    })
 
-	const instance = createLogger({
-		info: {
-			streams: [stream],
-		},
-	})
-
-	instance.info(message)
+    instance.info(message)
+  })
 })
 
-test.serial('logs object message', (t) => {
-	t.plan(1)
+test('logs object message', () => {
+  return new Promise((resolve) => {
+    const message = { test: uuid() }
 
-	const message = { test: uuid() }
+    const stream = new Writable({
+      write: (chunk, encoding, callback) => {
+        assert.ok(chunk.toString().includes(format(message)))
+        callback()
+        resolve()
+      },
+    })
 
-	const stream = new Writable({
-		write: (chunk, encoding, callback) => {
-			t.true(chunk.toString().includes(util.format(message)))
-			callback()
-		},
-	})
+    const instance = createLogger({
+      info: {
+        streams: [stream],
+      },
+    })
 
-	const instance = createLogger({
-		info: {
-			streams: [stream],
-		},
-	})
-
-	instance.info(message)
+    instance.info(message)
+  })
 })
 
-test.serial('logs error message', (t) => {
-	t.plan(1)
+test('logs error message', () => {
+  return new Promise((resolve) => {
+    const message = new Error(uuid())
 
-	const message = new Error(uuid())
+    const stream = new Writable({
+      write: (chunk, encoding, callback) => {
+        assert.ok(chunk.toString().includes(message.message))
+        callback()
+        resolve()
+      },
+    })
 
-	const stream = new Writable({
-		write: (chunk, encoding, callback) => {
-			t.true(chunk.toString().includes(message.message))
-			callback()
-		},
-	})
+    const instance = createLogger({
+      info: {
+        stack: false,
+        streams: [stream],
+      },
+    })
 
-	const instance = createLogger({
-		info: {
-			stack: false,
-			streams: [stream],
-		},
-	})
-
-	instance.info(message)
+    instance.info(message)
+  })
 })
 
-test.serial('logs error stack', (t) => {
-	let count = 0
+test('logs error stack', () => {
+  return new Promise((resolve) => {
+    let count = 0
 
-	const message = new Error(uuid())
+    const message = new Error(uuid())
 
-	const stream = new Writable({
-		write: (chunk, encoding, callback) => {
-			count += 1
-			callback()
-		},
-	})
+    const stream = new Writable({
+      write: (chunk, encoding, callback) => {
+        count += 1
+        callback()
 
-	const instance = createLogger({
-		info: {
-			streams: [stream],
-		},
-	})
+        // Give it time to accumulate more writes for stack
+        setTimeout(() => {
+          // The test only includes one log call which means we can assume that
+          // multiple write stream calls mean that the stack has been logged.
+          assert.ok(count > 1)
+          resolve()
+        }, 10)
+      },
+    })
 
-	instance.info(message)
+    const instance = createLogger({
+      info: {
+        streams: [stream],
+      },
+    })
 
-	// The test only includes one log call which means we can assume that
-	// multiple write stream calls mean that the stack has been logged.
-	t.true(count > 1)
+    instance.info(message)
+  })
 })
 
-test.serial('returns nested logger', (t) => {
-	const instance = createLogger({
-		instance: createLogger({
-			info: {},
-		}),
-	})
+test('returns nested logger', () => {
+  const instance = createLogger({
+    instance: createLogger({
+      info: {},
+    }),
+  })
 
-	t.is(typeof instance.instance.info, 'function')
+  assert.equal(typeof instance.instance.info, 'function')
 })
