@@ -52,8 +52,8 @@ const write =
  * Creates a logger instance with the specified types and options.
  *
  * @param {object} types - Logger types configuration. Each key is a log type with its options.
- * @param {object} [options] - Global options for the logger.
- * @param {number} [options.indention] - Indentation level for log labels.
+ * @param {?object} options - Global options for the logger.
+ * @param {?number} options.indention - Indentation level for log labels.
  * @returns {object} - Logger instance with methods for each log type.
  */
 export const createLogger = (types, options) => {
