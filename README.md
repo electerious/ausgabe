@@ -2,7 +2,7 @@
 
 # ausgabe
 
-![Build](https://github.com/electerious/ausgabe/workflows/Build/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/electerious/ausgabe/badge.svg?branch=main)](https://coveralls.io/github/electerious/ausgabe?branch=master)
+![Build](https://github.com/electerious/ausgabe/workflows/Build/badge.svg)
 
 Tiny logger with zero defaults.
 
