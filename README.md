@@ -177,18 +177,18 @@ const instance = createLogger(
 
 ### Parameters
 
-- `types` `{Object}` Methods of the logger.
-  - `color` `{?String}` Color of the log. Must be supported by [chalk](https://github.com/chalk/chalk). Defaults to `blue`.
-  - `badge` `{?String}` Icon to log along with the message. Using [figures](https://github.com/sindresorhus/figures) is recommended. Defaults to `ℹ`.
-  - `label` `{?String}` Label to log along with the message. Defaults to `info`.
-  - `stack` `{?Boolean}` Determines if the stack of an error should be logged. Defaults to `true`.
-  - `streams` `{?Array}` [Writable streams](https://nodejs.org/api/stream.html#stream_writable_streams) to which the data is written. Defaults to `[process.stdout]`.
-- `options` `{?Object}` Options.
-  - `indention` `{?Integer}` Aligns log messages with a custom indention.
+- `types` `{object}` Methods of the logger.
+  - `color` `{?string}` Color of the log. Must be supported by [chalk](https://github.com/chalk/chalk). Defaults to `blue`.
+  - `badge` `{?string}` Icon to log along with the message. Using [figures](https://github.com/sindresorhus/figures) is recommended. Defaults to `ℹ`.
+  - `label` `{?string}` Label to log along with the message. Defaults to `info`.
+  - `stack` `{?boolean}` Determines if the stack of an error should be logged. Defaults to `true`.
+  - `streams` `{?WritableStream[]}` [Writable streams](https://nodejs.org/api/stream.html#stream_writable_streams) to which the data is written. Defaults to `[process.stdout]`.
+- `options` `{?object}` Options.
+  - `indention` `{?number}` Aligns log messages with a custom indention. Defaults to `0`.
 
 ### Returns
 
-- `{Function}({String},{?...*})` [ausgabe instance](#instance-api).
+- `{object}` [ausgabe instance](#instance-api).
 
 ## Instance API
 
@@ -201,8 +201,8 @@ instance.info('%s %s', 'Hello', 'world')
 
 ### Parameters
 
-- `message` `{String}` Message containing zero or more substitution strings.
-- `substitutions` `{?...*}` Data with which to replace substitution strings within `message`.
+- `message` `{any}` Data to log that may contain zero or more substitution strings.
+- `substitutions` `{...any}` Data with which to replace substitution strings within `message`.
 
 ## Miscellaneous
 

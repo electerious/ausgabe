@@ -15,6 +15,14 @@ const defaultTypeOptions = {
 	streams: [process.stdout],
 }
 
+/**
+ * Parses a message and its substitutions.
+ * If the message is an Error, extracts the message and stack trace.
+ *
+ * @param {any} message - The message to parse that may contain zero or more substitution strings.
+ * @param {...any} substitutions - Data with which to replace substitution strings within `message`.
+ * @returns {[string, string[]]} - Parsed message and stack trace (if applicable).
+ */
 const parse = (message, ...substitutions) => {
 	if (message instanceof Error) {
 		const parsedMessage = message.message
@@ -26,6 +34,12 @@ const parse = (message, ...substitutions) => {
 	return [util.format(message, ...substitutions), []]
 }
 
+/**
+ * Creates a writer function for the provided streams.
+ *
+ * @param {WritableStream[]} streams - Array of writable streams to write messages to.
+ * @returns {function(...string): void} - A function that writes messages to the streams.
+ */
 const write =
 	(streams) =>
 	(...messages) => {
@@ -34,6 +48,14 @@ const write =
 		})
 	}
 
+/**
+ * Creates a logger instance with the specified types and options.
+ *
+ * @param {object} types - Logger types configuration. Each key is a log type with its options.
+ * @param {object} [options] - Global options for the logger.
+ * @param {number} [options.indention=0] - Indentation level for log labels.
+ * @returns {object} - Logger instance with methods for each log type.
+ */
 export const createLogger = (types, options) => {
 	const methods = Object.entries(types).reduce((methods, [typeName, typeOptions]) => {
 		const isNestedInstance = typeOptions[IDENTIFIER] === true
