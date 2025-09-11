@@ -2,7 +2,7 @@
 
 # ausgabe
 
-![Build](https://github.com/electerious/ausgabe/workflows/Build/badge.svg)
+[![Test](https://github.com/electerious/ausgabe/actions/workflows/test.yml/badge.svg)](https://github.com/electerious/ausgabe/actions/workflows/test.yml)
 
 Tiny logger with zero defaults.
 
