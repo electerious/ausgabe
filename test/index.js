@@ -6,17 +6,66 @@ import { format } from 'node:util'
 
 import { createLogger } from '../src/index.js'
 
-test('logs badge', () => {
-  const { resolve } = Promise.withResolvers()
+const isDevelopment = process.env.NODE_ENV === 'development'
 
-  const badge = uuid()
+const countErrorLines = (...errors) => {
+  const stackLines = errors.reduce((sum, error) => sum + error.stack.split('\n').length, 0)
+  const lineBreaks = errors.length - 1 // Each inner error adds a line break
+
+  return stackLines + lineBreaks
+}
+
+const createStream = (callbacks) => {
+  let timeout
+  const lines = []
 
   const stream = new Writable({
     write: (chunk, encoding, callback) => {
-      assert.ok(chunk.toString().includes(badge))
+      lines.push(chunk.toString())
+      if (isDevelopment) process.stderr.write(chunk)
+
+      callbacks.onWrite?.(chunk.toString())
+
+      clearTimeout(timeout)
+      timeout = setTimeout(() => {
+        callbacks.onDone?.(lines)
+      }, 50)
+
       callback()
-      resolve()
     },
+  })
+
+  return stream
+}
+
+test('returns logger', () => {
+  const instance = createLogger({
+    info: {},
+  })
+
+  assert.equal(typeof instance.info, 'function')
+})
+
+test('returns nested logger', () => {
+  const instance = createLogger({
+    instance: createLogger({
+      info: {},
+    }),
+  })
+
+  assert.equal(typeof instance.instance.info, 'function')
+})
+
+test('logs badge', () => {
+  const { promise, resolve } = Promise.withResolvers()
+
+  const badge = uuid()
+
+  const stream = createStream({
+    onWrite: (chunk) => {
+      assert.ok(chunk.includes(badge))
+    },
+    onDone: resolve,
   })
 
   const instance = createLogger({
@@ -27,19 +76,20 @@ test('logs badge', () => {
   })
 
   instance.info()
+
+  return promise
 })
 
 test('logs label', () => {
-  const { resolve } = Promise.withResolvers()
+  const { promise, resolve } = Promise.withResolvers()
 
   const label = uuid()
 
-  const stream = new Writable({
-    write: (chunk, encoding, callback) => {
-      assert.ok(chunk.toString().includes(label))
-      callback()
-      resolve()
+  const stream = createStream({
+    onWrite: (chunk) => {
+      assert.ok(chunk.includes(label))
     },
+    onDone: resolve,
   })
 
   const instance = createLogger({
@@ -50,19 +100,20 @@ test('logs label', () => {
   })
 
   instance.info()
+
+  return promise
 })
 
-test('logs string message', () => {
-  const { resolve } = Promise.withResolvers()
+test('logs string', () => {
+  const { promise, resolve } = Promise.withResolvers()
 
   const message = uuid()
 
-  const stream = new Writable({
-    write: (chunk, encoding, callback) => {
-      assert.ok(chunk.toString().includes(message))
-      callback()
-      resolve()
+  const stream = createStream({
+    onWrite: (chunk) => {
+      assert.ok(chunk.includes(message))
     },
+    onDone: resolve,
   })
 
   const instance = createLogger({
@@ -72,17 +123,74 @@ test('logs string message', () => {
   })
 
   instance.info(message)
+
+  return promise
 })
 
-test('logs object message', () => {
-  const { resolve } = Promise.withResolvers()
+test('logs object', () => {
+  const { promise, resolve } = Promise.withResolvers()
 
   const message = { test: uuid() }
 
-  const stream = new Writable({
-    write: (chunk, encoding, callback) => {
-      assert.ok(chunk.toString().includes(format(message)))
-      callback()
+  const stream = createStream({
+    onWrite: (chunk) => {
+      assert.ok(chunk.includes(format(message)))
+    },
+    onDone: resolve,
+  })
+
+  const instance = createLogger({
+    info: {
+      streams: [stream],
+    },
+  })
+
+  instance.info(message)
+
+  return promise
+})
+
+test('logs error without stack', () => {
+  const { promise, resolve } = Promise.withResolvers()
+
+  const message = new Error(uuid())
+
+  const stream = createStream({
+    onWrite: (chunk) => {
+      assert.ok(chunk.includes(message.message))
+    },
+    onDone: resolve,
+  })
+
+  const instance = createLogger({
+    info: {
+      stack: false,
+      streams: [stream],
+    },
+  })
+
+  instance.info(message)
+
+  return promise
+})
+
+test('logs error with stack', () => {
+  const { promise, resolve } = Promise.withResolvers()
+
+  const messages = [uuid()]
+  const message = new Error(messages[0])
+  const lineCount = countErrorLines(message)
+
+  const stream = createStream({
+    onDone: (lines) => {
+      assert.equal(lines.length, lineCount)
+      for (const message of messages) {
+        assert.equal(
+          lines.some((line) => line.includes(message)),
+          true,
+        )
+      }
+
       resolve()
     },
   })
@@ -94,17 +202,29 @@ test('logs object message', () => {
   })
 
   instance.info(message)
+
+  return promise
 })
 
-test('logs error message', () => {
-  const { resolve } = Promise.withResolvers()
+test('logs complex error without stack', () => {
+  const { promise, resolve } = Promise.withResolvers()
 
-  const message = new Error(uuid())
+  const messages = [uuid(), uuid(), uuid(), uuid()]
+  const message = new AggregateError([new Error(messages[0], { cause: new Error(messages[1]) })], messages[2], {
+    cause: new Error(messages[3]),
+  })
+  const lineCount = 4
 
-  const stream = new Writable({
-    write: (chunk, encoding, callback) => {
-      assert.ok(chunk.toString().includes(message.message))
-      callback()
+  const stream = createStream({
+    onDone: (lines) => {
+      assert.equal(lines.length, lineCount)
+      for (const message of messages) {
+        assert.equal(
+          lines.some((line) => line.includes(message)),
+          true,
+        )
+      }
+
       resolve()
     },
   })
@@ -117,19 +237,30 @@ test('logs error message', () => {
   })
 
   instance.info(message)
+
+  return promise
 })
 
-test('logs error stack', () => {
-  const { resolve } = Promise.withResolvers()
+test('logs complex error with stack', () => {
+  const { promise, resolve } = Promise.withResolvers()
 
-  let count = 0
+  const messages = [uuid(), uuid(), uuid(), uuid()]
+  const message = new AggregateError([new Error(messages[0], { cause: new Error(messages[1]) })], messages[2], {
+    cause: new Error(messages[3]),
+  })
+  const lineCount = countErrorLines(message, message.cause, message.errors[0], message.errors[0].cause)
 
-  const message = new Error(uuid())
+  const stream = createStream({
+    onDone: (lines) => {
+      assert.equal(lines.length, lineCount)
+      for (const message of messages) {
+        assert.equal(
+          lines.some((line) => line.includes(message)),
+          true,
+        )
+      }
 
-  const stream = new Writable({
-    write: (chunk, encoding, callback) => {
-      count += 1
-      callback()
+      resolve()
     },
   })
 
@@ -141,21 +272,5 @@ test('logs error stack', () => {
 
   instance.info(message)
 
-  // Give it time to accumulate more writes for stack
-  setTimeout(() => {
-    // The test only includes one log call which means we can assume that
-    // multiple write stream calls mean that the stack has been logged.
-    assert.ok(count > 1)
-    resolve()
-  }, 10)
-})
-
-test('returns nested logger', () => {
-  const instance = createLogger({
-    instance: createLogger({
-      info: {},
-    }),
-  })
-
-  assert.equal(typeof instance.instance.info, 'function')
+  return promise
 })

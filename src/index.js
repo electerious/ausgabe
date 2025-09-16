@@ -16,22 +16,53 @@ const defaultTypeOptions = {
 }
 
 /**
- * Parses a message and its substitutions.
- * If the message is an Error, extracts the message and stack trace.
+ * Flattens a block into an array of lines, as some blocks need to be written in multiple lines
+ * (e.g. errors and their stack trace).
  *
- * @param {any} message - The message to parse that may contain zero or more substitution strings.
- * @param {...any} substitutions - Data with which to replace substitution strings within `message`.
- * @returns {[string, string[]]} - Parsed message and stack trace (if applicable).
+ * @param {any} block - The block to parse that may contain zero or more substitution strings.
+ * @param {any[]} substitutions - Data with which to replace substitution strings within `block`.
+ * @param {boolean} includeStack - Whether to include the stack trace for errors.
+ * @returns {string[]} - Array of lines with stack trace (if applicable).
  */
-const parse = (message, ...substitutions) => {
-  if (message instanceof Error) {
-    const parsedMessage = message.message
-    const parsedStack = message.stack ?? ''
+const flattenBlock = (block, substitutions, includeStack) => {
+  if (block instanceof Error) {
+    const message = block.message
+    if (includeStack === false) return [message]
 
-    return [parsedMessage, parsedStack.split('\n').slice(1)]
+    const stack = block.stack ?? ''
+    if (stack === '') return [message]
+
+    return [
+      message,
+      ...stack
+        .split('\n')
+        .map((line) => line.trim())
+        .slice(1),
+    ]
   }
 
-  return [format(message, ...substitutions), []]
+  return [format(block, ...substitutions)]
+}
+
+/**
+ * Flattens a message into an array of blocks, as some messages need to be written in multiple blocks
+ * (e.g. errors, error causes and aggregate errors).
+ *
+ * @param {any} message - The message to flatten.
+ * @returns {any[]} - Array of blocks.
+ */
+const flattenMessage = (message) => {
+  const blocks = [message]
+
+  if (message instanceof Error && message.cause instanceof Error) {
+    blocks.push(...flattenMessage(message.cause))
+  }
+
+  if (message instanceof AggregateError) {
+    blocks.push(...message.errors.flatMap(flattenMessage))
+  }
+
+  return blocks
 }
 
 /**
@@ -79,13 +110,39 @@ export const createLogger = (types, options) => {
     const writer = write(streams)
 
     const spacing = '  '
-    const prefix = chalk[color](badge + spacing + label.padEnd(indention) + spacing)
+    const prefix = badge + spacing + label.padEnd(indention) + spacing
+    const coloredPrefix = chalk[color](prefix)
+    const nestedPrefix = spacing
 
     const method = (message, ...substitutions) => {
-      const [parsedMessage, parsedStack] = parse(message, ...substitutions)
+      const blocks = flattenMessage(message)
 
-      writer(prefix, parsedMessage)
-      if (stack === true) for (const line of parsedStack) writer(chalk.gray(line))
+      for (const [index, block] of blocks.entries()) {
+        const firstBlock = index === 0
+        const [firstLine, ...additionalLines] = flattenBlock(block, substitutions, stack)
+
+        if (firstBlock) {
+          // The first block always starts with the prefixed line,
+          // followed by any additional lines (e.g. stack trace).
+          writer(coloredPrefix, firstLine)
+
+          for (const line of additionalLines) {
+            writer(nestedPrefix, chalk.gray(line))
+          }
+        } else {
+          // Add spacing between multiple blocks with stack traces,
+          // for a better visual separation.
+          if (stack === true) writer()
+
+          // Any subsequent blocks are indented to indicate nesting,
+          // with the first line in gray to indicate it's a continuation.
+          writer(nestedPrefix, chalk.gray(firstLine))
+
+          for (const line of additionalLines) {
+            writer(nestedPrefix + nestedPrefix, chalk.gray(line))
+          }
+        }
+      }
     }
 
     return {

@@ -83,10 +83,22 @@ const instance = createLogger(
   },
 )
 
+// Simple massages
 instance.info('Hello world')
 instance.info('%s %s', 'Hello', 'world')
+
+// Error messages
 instance.warn(new Error('Logs error without the stack'))
+
+// Complex error messages
 instance.error(new Error('Logs error with the stack'))
+instance.error(new Error('Logs error with the stack and cause error', { cause: new Error('Cause error') }))
+instance.error(
+  new AggregateError(
+    [new Error('First error'), new Error('Second error')],
+    'Logs aggregate error with multiple errors',
+  ),
+)
 ```
 
 ### Nested
