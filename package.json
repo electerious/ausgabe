@@ -1,6 +1,6 @@
 {
   "name": "ausgabe",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Tiny logger with zero defaults",
   "keywords": [
     "log",
