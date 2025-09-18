@@ -253,4 +253,5 @@ I am working hard on continuously developing and maintaining my projects. Please
 
 ### Links
 
-- [Follow me on Twitter](https://twitter.com/electerious)
+- [Follow me on Bluesky](https://bsky.app/profile/electerious.bsky.social)
+- [Follow me on Threads](https://www.threads.com/@electerious)
