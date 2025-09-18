@@ -17,10 +17,6 @@ Tiny logger with zero defaults.
 - [Description](#description)
 - [Install](#install)
 - [Usage](#usage)
-  - [Basic](#basic)
-  - [Advanced](#advanced)
-  - [Nested](#nested)
-  - [Streams](#streams)
 - [API](#api)
 - [Instance API](#instance-api)
 - [Miscellaneous](#miscellaneous)
@@ -152,6 +148,31 @@ const instance = createLogger({
 })
 
 instance.info('Hello world')
+```
+
+### Log all rejections and exceptions
+
+`ausgabe` only logs what you tell it to log. To catch all unhandled rejections and uncaught exceptions, you can use `process.on`. This isn't specific to `ausgabe`, but a general Node.js feature.
+
+```js
+import figures from 'figures'
+import { createLogger } from 'ausgabe'
+
+const instance = createLogger({
+  error: {
+    color: 'red',
+    badge: figures.cross,
+    label: 'error',
+  },
+})
+
+process.on('unhandledRejection', (error) => {
+  instance.error(error)
+})
+
+process.on('uncaughtException', (error) => {
+  instance.error(error)
+})
 ```
 
 ## API
