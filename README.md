@@ -239,6 +239,10 @@ instance.info('%s %s', 'Hello', 'world')
 
 ## Miscellaneous
 
+### Related
+
+- [signale](https://github.com/klaudiosinani/signale) - Highly configurable logging utility
+
 ### Donate
 
 I am working hard on continuously developing and maintaining my projects. Please consider making a donation to keep the project going strong and me motivated.
@@ -246,10 +250,6 @@ I am working hard on continuously developing and maintaining my projects. Please
 - [Become a GitHub sponsor](https://github.com/sponsors/electerious)
 - [Donate via PayPal](https://paypal.me/electerious)
 - [Buy me a coffee](https://www.buymeacoffee.com/electerious)
-
-### Related
-
-- [signale](https://github.com/klaudiosinani/signale) - Highly configurable logging utility
 
 ### Links
 
