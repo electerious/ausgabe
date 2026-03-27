@@ -79,7 +79,7 @@ const instance = createLogger(
   },
 )
 
-// Simple massages
+// Simple messages
 instance.info('Hello world')
 instance.info('%s %s', 'Hello', 'world')
 
