@@ -35,7 +35,7 @@
   "devDependencies": {
     "@electerious/eslint-config": "^5.2.2",
     "@electerious/prettier-config": "^4.0.1",
-    "eslint": "^9.39.3",
+    "eslint": "^9.39.4",
     "prettier": "^3.8.1"
   },
   "engines": {
