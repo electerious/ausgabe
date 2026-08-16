@@ -184,12 +184,10 @@ test('logs error with stack', () => {
   const stream = createStream({
     onDone: (lines) => {
       assert.equal(lines.length, lineCount)
-      for (const message of messages) {
-        assert.equal(
-          lines.some((line) => line.includes(message)),
-          true,
-        )
-      }
+      assert.equal(
+        messages.every((message) => lines.some((line) => line.includes(message))),
+        true,
+      )
 
       resolve()
     },
@@ -218,12 +216,10 @@ test('logs complex error without stack', () => {
   const stream = createStream({
     onDone: (lines) => {
       assert.equal(lines.length, lineCount)
-      for (const message of messages) {
-        assert.equal(
-          lines.some((line) => line.includes(message)),
-          true,
-        )
-      }
+      assert.equal(
+        messages.every((message) => lines.some((line) => line.includes(message))),
+        true,
+      )
 
       resolve()
     },
@@ -253,12 +249,10 @@ test('logs complex error with stack', () => {
   const stream = createStream({
     onDone: (lines) => {
       assert.equal(lines.length, lineCount)
-      for (const message of messages) {
-        assert.equal(
-          lines.some((line) => line.includes(message)),
-          true,
-        )
-      }
+      assert.equal(
+        messages.every((message) => lines.some((line) => line.includes(message))),
+        true,
+      )
 
       resolve()
     },

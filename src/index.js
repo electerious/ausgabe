@@ -90,7 +90,7 @@ const write =
 export const createLogger = (types, options) => {
   const methods = Object.entries(types).reduce((methods, [typeName, typeOptions]) => {
     const isNestedInstance = typeOptions[IDENTIFIER] === true
-    if (isNestedInstance === true) {
+    if (isNestedInstance) {
       return {
         ...methods,
         [typeName]: typeOptions,
